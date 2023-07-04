@@ -188,6 +188,23 @@ groups:
       - mcambria@redhat.com
       - thockin@google.com
 
+  - email-id: kpng@kubernetes.io
+    name: kpng
+    description: |-
+      The Kubernetes Proxy NG a new design of kube-proxy
+    settings:
+      ReconcileMembers: "true"
+    members:
+      - mcluseau
+      - jayunit100
+      - thockin
+      - hanamantagoudvk
+      - VivekThrivikraman-est
+      - astoycos
+      - rajaskakodkar
+      - qabpea
+      - aroradaman
+
   #
   # k8s-infra owners for sig-owned subprojects
   #
