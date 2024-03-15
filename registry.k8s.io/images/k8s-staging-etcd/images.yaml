@@ -22,6 +22,7 @@
     "sha256:29901446ff08461789b7cd8565fc5b538134e58f81ca1f50fd65d0371cf6571e": ["3.5.11-0"]
     "sha256:44a8e24dcbba3470ee1fee21d5e88d128c936e9b55d4bc51fbef8086f8ed123b": ["3.5.12-0"]
     "sha256:87cd0c2afe02de8dca78b8027852a6e8a18752ad5036be71ff21dea8c175abb9": ["3.6.0-alpha.0-0"]
+    "sha256:87cd0c2afe02de8dca78b8027852a6e8a18752ad5036be71ff21dea8c175abb9": ["3.99.0-0"]
 - name: etcd-empty-dir-cleanup
   dmap:
     "sha256:f805272b4422efa92e20789295c343ed26ff36ddc4f70eeb5d7890d6b758b0fc": ["3.4.7.0"]
