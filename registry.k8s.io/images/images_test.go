@@ -1,7 +1,9 @@
 package images
 
 import (
+	"context"
 	"log"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -86,4 +88,42 @@ func TestPullImage(t *testing.T) {
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
+}
+
+func TestImages(t *testing.T) {
+	newManifestList, err := image.NewManifestListFromFile(filepath.Join(imgfilepath))
+	if err != nil {
+		panic(err)
+	}
+	reg, err := remote.NewRegistry("gcr.io")
+	if err != nil {
+		panic(err)
+	}
+	total := 0
+	checkDigestFailedTags := []string{}
+	for _, imageData := range *newManifestList {
+		src, err := reg.Repository(context.TODO(), "k8s-staging-dns/"+imageData.Name)
+		if err != nil {
+			panic(err)
+		}
+		for digest, tags := range imageData.DMap {
+			for _, tag := range tags {
+				if tag != "1.23.0" {
+					continue
+				}
+				log.Println("checking image for:", "gcr.io/k8s-staging-dns/"+imageData.Name+":"+tag)
+				total++
+				dst := memory.New()
+				desc, err := oras.Copy(context.TODO(), src, tag, dst, tag, oras.DefaultCopyOptions)
+				if err != nil {
+					panic(err)
+				}
+				if desc.Digest.String() != digest {
+					checkDigestFailedTags = append(checkDigestFailedTags, "gcr.io/k8s-staging-dns/"+imageData.Name+":"+tag)
+				}
+			}
+		}
+	}
+	log.Printf("check total:%d, failed:%d \n", total, len(checkDigestFailedTags))
+
 }
