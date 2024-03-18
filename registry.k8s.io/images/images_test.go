@@ -9,6 +9,10 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"oras.land/oras-go/v2"
+	"oras.land/oras-go/v2/content/memory"
+	"oras.land/oras-go/v2/registry/remote"
+	"sigs.k8s.io/promo-tools/v4/image"
 )
 
 func TestPullImage(t *testing.T) {
@@ -91,6 +95,7 @@ func TestPullImage(t *testing.T) {
 }
 
 func TestImages(t *testing.T) {
+	imgfilepath := "/home/runner/work/lanactions/lanactions/k8s.io/registry.k8s.io/images"
 	newManifestList, err := image.NewManifestListFromFile(filepath.Join(imgfilepath))
 	if err != nil {
 		panic(err)
