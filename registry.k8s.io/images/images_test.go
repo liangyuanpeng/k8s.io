@@ -16,6 +16,7 @@ import (
 )
 
 func TestPullImage(t *testing.T) {
+	// go test -timeout 30s -run ^TestPullImage$ images -v
 	// 仓库路径
 	repoPath := "/home/runner/work/lanactions/lanactions/k8s.io"
 
