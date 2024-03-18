@@ -74,6 +74,27 @@ func TestPullImage(t *testing.T) {
 			continue
 		}
 		log.Printf("filepatch2:%s|%s \n", fromPath, toPath)
+
+		fromManifestList := &image.ManifestList{}
+		toManifestList := &image.ManifestList{}
+
+		if fromPath != "" {
+			fromManifestList, err = image.NewManifestListFromFile(filepath.Join(repoPath + "/" + fromPath))
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		toManifestList, err = image.NewManifestListFromFile(filepath.Join(repoPath + "/" + toPath))
+		if err != nil {
+			panic(err)
+		}
+
+		newManifestList := diffNewManifestList(fromManifestList, toManifestList)
+		for _, imageData := range *newManifestList {
+			log.Println("imageData:",imageData.Name)
+		}
+
 	}
 
 	// 遍历差异的文件
@@ -93,6 +114,10 @@ func TestPullImage(t *testing.T) {
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
+}
+
+func diffNewManifestList(from, to *image.ManifestList) *image.ManifestList {
+	return &image.ManifestList{}
 }
 
 func TestImages(t *testing.T) {
