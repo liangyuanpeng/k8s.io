@@ -39,6 +39,18 @@ groups:
       - varunmar@google.com
       - zihongz@google.com
 
+  - email-id: k8s-infra-staging-node-ipam-controller@kubernetes.io
+    name: k8s-infra-staging-node-ipam-controller
+    description: |-
+      ACL for staging node-ipam-controller images.
+    settings:
+      ReconcileMembers: "true"
+    members:
+      - ameukam@gmail.com
+      - antonio.ojea.garcia@gmail.com
+      - sarveshr@google.com
+
+
   - email-id: k8s-infra-staging-cpa@kubernetes.io
     name: k8s-infra-staging-cpa
     description: |-
