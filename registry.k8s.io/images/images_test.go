@@ -33,7 +33,7 @@ func TestPullImage(t *testing.T) {
 	// 获取两个分支的Commit对象
 	baseRef, err := repo.Reference(plumbing.NewBranchReferenceName(baseBranch), true)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("fetch "+baseBranch+" failed!", err)
 	}
 	baseCommit, err := repo.CommitObject(baseRef.Hash())
 	if err != nil {
@@ -41,7 +41,7 @@ func TestPullImage(t *testing.T) {
 	}
 	targetRef, err := repo.Reference(plumbing.NewBranchReferenceName(targetBranch), true)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("fetch "+targetBranch+" failed!", err)
 	}
 	targetCommit, err := repo.CommitObject(targetRef.Hash())
 	if err != nil {
@@ -92,7 +92,7 @@ func TestPullImage(t *testing.T) {
 
 		newManifestList := diffNewManifestList(fromManifestList, toManifestList)
 		for _, imageData := range *newManifestList {
-			log.Println("imageData:",imageData.Name)
+			log.Println("imageData:", imageData.Name)
 		}
 
 	}
