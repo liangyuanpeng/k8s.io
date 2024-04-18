@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -66,14 +67,14 @@ func TestPullImage(t *testing.T) {
 		if to != nil {
 			toPath = to.Path()
 		}
-		log.Printf("filepatch:%s|%s \n", fromPath, toPath)
+		// log.Printf("filepatch:%s|%s \n", fromPath, toPath)
 		if !strings.HasPrefix(toPath, "registry.k8s.io/images") {
 			continue
 		}
 		if !strings.HasSuffix(toPath, ".yaml") {
 			continue
 		}
-		log.Printf("filepatch2:%s|%s \n", fromPath, toPath)
+		// log.Printf("filepatch2:%s|%s \n", fromPath, toPath)
 
 		fromManifestList := &image.ManifestList{}
 		toManifestList := &image.ManifestList{}
@@ -117,6 +118,60 @@ func TestPullImage(t *testing.T) {
 }
 
 func diffNewManifestList(from, to *image.ManifestList) *image.ManifestList {
+	for _, v := range *to {
+		mTo := v.DMap
+		mFrom := v.DMap
+		for _, v2 := range *from {
+			if v2.Name == v.Name {
+				mFrom = v2.DMap
+				break
+			}
+		}
+		// log.Println("m1.eq m2:", v.Name, reflect.DeepEqual(m1, m2))
+		if !reflect.DeepEqual(v, mFrom) {
+			log.Println("v.Name:", v.Name)
+			log.Println("mTo:", mTo)
+			log.Println("mFrom:", mFrom)
+			addMap := make(map[string][]string)
+			for digestSha256, TagsFrom := range mFrom {
+
+				if _, ok := mTo[digestSha256]; !ok {
+					addMap[digestSha256] = TagsFrom
+					continue
+				}
+
+				for digestSha256To, TagsTo := range mTo {
+					if digestSha256 != digestSha256To {
+						continue
+					}
+					if reflect.DeepEqual(TagsFrom, TagsTo) {
+						continue
+					}
+
+					addTags := []string{}
+					for _, tagTo := range TagsTo {
+						exist := false
+						for _, TagFrom := range TagsFrom {
+							if tagTo == TagFrom {
+								exist = true
+								break
+							}
+						}
+						if !exist {
+							addTags = append(addTags, tagTo)
+						}
+					}
+
+					log.Println("new tags:", digestSha256To, addTags)
+					addMap[digestSha256To] = addTags
+
+				}
+			}
+			log.Println("addMap:", addMap)
+			log.Println("=====")
+			break
+		}
+	}
 	return &image.ManifestList{}
 }
 
