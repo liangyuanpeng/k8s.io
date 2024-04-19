@@ -16,6 +16,16 @@ import (
 	"sigs.k8s.io/promo-tools/v4/image"
 )
 
+func TestPrint(t *testing.T) {
+	ml, err := image.NewManifestListFromFile(filepath.Join("/home/runner/work/lanactions/lanactions/k8s.io/registry.k8s.io/images/k8s-staging-kops/images.yaml"))
+	if err != nil {
+		panic(err)
+	}
+	for _, v := range *ml {
+		log.Println("name:", v.Name)
+	}
+}
+
 func TestAA(t *testing.T) {
 	tagsTo := []string{}
 	tagsTo = append(tagsTo, "a1")
@@ -130,6 +140,16 @@ func TestPullImage(t *testing.T) {
 }
 
 func diffNewManifestList(from, to *image.ManifestList) *image.ManifestList {
+	// TODO 需要先整理 from 和 to 的 name,
+	// 如下格式
+	// # 1.22.4
+	// - name: dns-controller
+	// dmap:
+	// 	"sha256:655f0ce8111cce8cac155cd92147c5736d5c9936d0e914912f6b1a3b94888070": ["1.22.4"]
+	// - name: kops-controller
+	// dmap:
+	// 	"sha256:69cbb1db75e07772ffa240fad8ee3de9ad0dae1118bc9d9aa8ca5288cbf0d9d0": ["1.22.4"]
+
 	for _, v := range *to {
 		mTo := v.DMap
 		mFrom := v.DMap
