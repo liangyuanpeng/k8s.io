@@ -16,6 +16,18 @@ import (
 	"sigs.k8s.io/promo-tools/v4/image"
 )
 
+func TestAA(t *testing.T) {
+	tagsTo := []string{}
+	tagsTo = append(tagsTo, "a1")
+	tagsFrom := []string{}
+	tagsFrom = append(tagsFrom, "a1")
+	mapTo := make(map[string][]string)
+	mapFrom := make(map[string][]string)
+	mapTo["a1"] = tagsTo
+	mapFrom["a1"] = tagsFrom
+	log.Println("eq:", reflect.DeepEqual(tagsTo, tagsFrom))
+}
+
 func TestPullImage(t *testing.T) {
 	// go test -timeout 30s -run ^TestPullImage$ images -v
 	// 仓库路径
@@ -128,7 +140,7 @@ func diffNewManifestList(from, to *image.ManifestList) *image.ManifestList {
 			}
 		}
 		// log.Println("m1.eq m2:", v.Name, reflect.DeepEqual(m1, m2))
-		if !reflect.DeepEqual(v, mFrom) {
+		if !reflect.DeepEqual(mTo, mFrom) {
 			log.Println("v.Name:", v.Name)
 			log.Println("mTo:", mTo)
 			log.Println("mFrom:", mFrom)
@@ -169,7 +181,7 @@ func diffNewManifestList(from, to *image.ManifestList) *image.ManifestList {
 			}
 			log.Println("addMap:", addMap)
 			log.Println("=====")
-			break
+			// break
 		}
 	}
 	return &image.ManifestList{}
