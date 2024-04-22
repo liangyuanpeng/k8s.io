@@ -56,7 +56,8 @@ func main() {
 			}
 
 			if printAll == "1" {
-				log.Printf("dirty:%t,rebuilding:%t \n", v.Dirty, v.Rebuilding, f.Name(), fsi.ModTime(), fsi.ModTime().After(t2))
+				// log.Printf("dirty:%t,rebuilding:%t \n", v.Dirty, v.Rebuilding, f.Name(), fsi.ModTime(), fsi.ModTime().After(t2))
+				log.Println("dirty:%t,rebuilding:%t \n", v.Dirty, v.Rebuilding, f.Name(), fsi.ModTime(), fsi.ModTime().After(t2))
 			} else {
 				if !v.Dirty && !v.Rebuilding {
 
