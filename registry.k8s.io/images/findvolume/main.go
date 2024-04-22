@@ -49,8 +49,14 @@ func main() {
 			v := &VolumeMeta{}
 			err = json.Unmarshal(data, v)
 			checkErr(err)
+			fsi, err := f.Info()
+			if err != nil {
+				log.Println("get modTime failed!", f.Name(), err)
+				continue
+			}
+
 			if printAll == "1" {
-				log.Printf("dirty:%t,rebuilding:%t \n", v.Dirty, v.Rebuilding)
+				log.Printf("dirty:%t,rebuilding:%t \n", v.Dirty, v.Rebuilding, f.Name(), fsi.ModTime(), fsi.ModTime().After(t2))
 			} else {
 				if !v.Dirty && !v.Rebuilding {
 
@@ -69,13 +75,8 @@ func main() {
 							continue
 						}
 					}
-					fsi, err := f.Info()
-					if err != nil {
-						log.Println("get modTime failed!", f.Name(), err)
-						continue
-					}
-					// log.Println(fsi.ModTime().After(t2))
 
+					// log.Println(fsi.ModTime().After(t2))
 					log.Println("fs.path is not dirty and rebuilding:", f.Name(), fsi.ModTime(), fsi.ModTime().After(t2))
 					dockerCommand := fmt.Sprintf("docker run -v /dev:/host/dev -v /proc:/host/proc -v %s%s:/volume --privileged longhornio/longhorn-engine:v1.6.1 launch-simple-longhorn %s %d", rootPath, f.Name(), pvcName, v.Size)
 					log.Println("got the command:\n", dockerCommand)
