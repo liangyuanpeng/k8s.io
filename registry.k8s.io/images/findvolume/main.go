@@ -19,6 +19,15 @@ type VolumeMeta struct {
 	Parent          string
 	SectorSize      int
 	BackingFilePath string
+
+	Info VolumeInfo
+}
+
+type VolumeInfo struct {
+	PVCName       string
+	ReplicaName   string
+	ModTime       string
+	DockerCommand string
 }
 
 func main() {
@@ -30,7 +39,8 @@ func main() {
 		skipVolumes = strings.Split(skipVolumesStr, ",")
 	}
 	if rootPath == "" {
-		log.Fatalln("empty rootPath!!,set it into the env FIND_PATH")
+		rootPath = "/var/lib/longhorn/replicas/"
+		// log.Fatalln("empty rootPath!!,set it into the env FIND_PATH")
 	}
 	if printAll == "" {
 		printAll = "0"
@@ -41,6 +51,11 @@ func main() {
 	fss, err := os.ReadDir(rootPath)
 	checkErr(err)
 	t2 := time.Date(2024, time.January, 1, 1, 0, 0, 0, time.UTC)
+	vminfos := []*VolumeMeta{}
+
+	datamap := make(map[string][]*VolumeMeta)
+	datamap["vminfos"] = vminfos
+
 	for _, f := range fss {
 		if f.IsDir() {
 			// log.Println("fs.path:", f.Name())
@@ -55,15 +70,25 @@ func main() {
 				continue
 			}
 
+			splitStrs := strings.Split(f.Name(), "-")
+			replicasName := splitStrs[len(splitStrs)-1]
+			pvcName := strings.ReplaceAll(f.Name(), "-"+replicasName, "")
+			dockerCommand := fmt.Sprintf("docker run -v /dev:/host/dev -v /proc:/host/proc -v %s%s:/volume --privileged longhornio/longhorn-engine:v1.6.1 launch-simple-longhorn %s %d", rootPath, f.Name(), pvcName, v.Size)
+
+			v.Info = VolumeInfo{
+				ModTime:       fsi.ModTime().Format("2006-01-02 15:04:05"),
+				PVCName:       pvcName,
+				ReplicaName:   replicasName,
+				DockerCommand: dockerCommand,
+			}
+			vminfos = append(vminfos, v)
+
 			if printAll == "1" {
 				// log.Printf("dirty:%t,rebuilding:%t \n", v.Dirty, v.Rebuilding, f.Name(), fsi.ModTime(), fsi.ModTime().After(t2))
 				log.Println("dirty:%t,rebuilding:%t \n", v.Dirty, v.Rebuilding, f.Name(), fsi.ModTime(), fsi.ModTime().After(t2))
 			} else {
 				if !v.Dirty && !v.Rebuilding {
 
-					splitStrs := strings.Split(f.Name(), "-")
-					replicasName := splitStrs[len(splitStrs)-1]
-					pvcName := strings.ReplaceAll(f.Name(), "-"+replicasName, "")
 					if len(skipVolumes) > 0 {
 						skip := false
 						for _, sv := range skipVolumes {
@@ -79,12 +104,28 @@ func main() {
 
 					// log.Println(fsi.ModTime().After(t2))
 					log.Println("fs.path is not dirty and rebuilding:", f.Name(), fsi.ModTime(), fsi.ModTime().After(t2))
-					dockerCommand := fmt.Sprintf("docker run -v /dev:/host/dev -v /proc:/host/proc -v %s%s:/volume --privileged longhornio/longhorn-engine:v1.6.1 launch-simple-longhorn %s %d", rootPath, f.Name(), pvcName, v.Size)
 					log.Println("got the command:\n", dockerCommand)
 				}
 			}
 		}
 	}
+
+	if len(vminfos) > 0 {
+		jsonPath := "/tmp/myinfo.json"
+		jsonFile, err := os.Create(jsonPath) // 创建 json 文件
+		if err != nil {
+			log.Printf("create json file %v error [ %v ]", jsonPath, err)
+			return
+		}
+		defer jsonFile.Close()
+		datamap["vminfos"] = vminfos
+		encode := json.NewEncoder(jsonFile) // 创建编码器
+		err = encode.Encode(datamap)        // 编码
+		if err != nil {
+			log.Printf("encode error [ %v ]", err)
+		}
+	}
+
 }
 
 func checkErr(err error) {
